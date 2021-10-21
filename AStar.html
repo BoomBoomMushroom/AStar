@@ -1,0 +1,475 @@
+<canvas id="game" width=500 height=500></canvas>
+
+<br>
+<br>
+
+<button onclick='search()'>Search Next Square</button>
+<button onclick='auto=true'>Auto Complete</button>
+<button onclick='location.reload()'>Reset Map</button>
+
+<style>
+    #game{
+        border: 1px solid black;
+    }
+</style>
+<script>
+    const c = document.getElementById("game");
+    const ctx = c.getContext('2d');
+    const pixelSize = 50;
+    const keyCodes = [];
+    const players = [];
+    var moves = 0
+    const colorCodeMeaning = {
+        wall: "#ff4444",
+        nonSearched: "#7b7b7b",
+        searched: "#000000",
+    }
+    const prevSearches = [{row:0,index:0},{row:0,index:0},{row:0,index:0},{row:0,index:0}]
+    var pathCompleted = false
+    var auto = false;
+    /*
+    0: Open
+    1: Closed
+    2: Start
+    3: End
+    4: Wall
+    5: Discovered
+    6: Complete Path
+    */
+    var discMap = [
+        [{t:3,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}}],
+        [{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}}],
+        [{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}}],
+        [{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}}],
+        [{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}}],
+        [{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}}],
+        [{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}}],
+        [{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}}],
+        [{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}}],
+        [{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:0,h:0,g:0,f:0,p:{row:0,index:0,type:"None"}},{t:2,h:0,g:0,f:0,p:{row:0,index:0,type:"start"}}],
+    ]
+
+    function clearCanvas(){
+        ctx.clearRect(0,0,c.width,c.height)
+    }
+    function drawPixel(x,y,dx,dy,color){
+        if(color){
+            ctx.fillStyle = color;
+        } else{
+            ctx.fillStyle = '#000000';
+        }
+        ctx.fillRect(x,y,dx,dy);
+    }   
+    function drawText(text,x,y,size){
+        ctx.font = size+"px Arial";
+        ctx.strokeText(text,x,y);
+    }
+    function drawLines(){
+        for(var i=1;i<discMap.length;i++){
+            var mapRow=discMap[i];
+            drawPixel(i*pixelSize,0,1,500);
+            drawPixel(0,i*pixelSize,500,1);
+        }
+    }
+    function calculateGScore(currentNode){
+        var currentNode2 = currentNode
+        var currentGScore = 0
+
+        function updateGScore(){
+            var stringArr = currentGScore.toString().split('.');
+            if(stringArr.length==2){
+                if(stringArr[1].charAt(stringArr[1].length-1)==9){
+                    currentGScore=parseInt(stringArr[0]+'.'+2)
+                }
+                if(stringArr[1].charAt(stringArr[1].length-1)==1){
+                    currentGScore=parseInt(stringArr[0]+'.'+parseInt(stringArr+.000000000000001))
+                }
+            }
+            else{
+                currentGScore+=0
+            }
+            currentGScore+=0
+        }
+
+        if(currentNode.t===2){updateGScore();return currentGScore}
+        else{
+            if(currentNode2.p.type==="blocked"){currentGScore+=1}
+            if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+            currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+            if(currentNode2.t===2){updateGScore();return currentGScore}
+            if(currentNode.t===2){updateGScore();return currentGScore}
+            else{
+                if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                if(currentNode2.t===2){updateGScore();return currentGScore}
+                if(currentNode.t===2){updateGScore();return currentGScore}
+                else{
+                    if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                    if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                    currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                    if(currentNode2.t===2){updateGScore();return currentGScore}
+                    if(currentNode.t===2){updateGScore();return currentGScore}
+                    else{
+                        if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                        if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                        currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                        if(currentNode2.t===2){updateGScore();return currentGScore}
+                        if(currentNode.t===2){updateGScore();return currentGScore}
+                        else{
+                            if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                            if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                            currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                            if(currentNode2.t===2){updateGScore();return currentGScore}
+                            if(currentNode.t===2){updateGScore();return currentGScore}
+                            else{
+                                if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                                if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                                currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                                if(currentNode2.t===2){updateGScore();return currentGScore}
+                                if(currentNode.t===2){updateGScore();return currentGScore}
+                                else{
+                                    if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                                    if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                                    currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                                    if(currentNode2.t===2){updateGScore();return currentGScore}
+                                    else{
+                                        if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                                        if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                                        currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                                        if(currentNode2.t===2){updateGScore();return currentGScore}
+                                        else{
+                                            if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                                            if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                                            currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                                            if(currentNode2.t===2){updateGScore();return currentGScore}
+                                            else{
+                                                if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                                                if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                                                currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                                                if(currentNode2.t===2){updateGScore();return currentGScore}
+                                                else{
+                                                    if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                                                    if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                                                    currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                                                    if(currentNode2.t===2){updateGScore();return currentGScore}
+                                                    else{
+                                                        if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                                                        if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                                                        currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                                                        if(currentNode2.t===2){updateGScore();return currentGScore}
+                                                        else{
+                                                            if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                                                            if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                                                            currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                                                            if(currentNode2.t===2){updateGScore();return currentGScore}
+                                                            else{
+                                                                if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                                                                if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                                                                currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                                                                if(currentNode2.t===2){updateGScore();return currentGScore}
+                                                                else{
+                                                                    if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                                                                    if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                                                                    currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                                                                    if(currentNode2.t===2){updateGScore();return currentGScore}
+                                                                    else{
+                                                                        if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                                                                        if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                                                                        currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                                                                        if(currentNode2.t===2){updateGScore();return currentGScore}
+                                                                        else{
+                                                                            if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                                                                            if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                                                                            currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                                                                            if(currentNode2.t===2){updateGScore();return currentGScore}
+                                                                            else{
+                                                                                if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                                                                                if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                                                                                currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                                                                                if(currentNode2.t===2){updateGScore();return currentGScore}
+                                                                                else{
+                                                                                    if(currentNode2.p.type==="blocked"){currentGScore+=1}
+                                                                                    if(currentNode2.p.type==="diag"){currentGScore+=1.4}
+                                                                                    currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                                                                                    if(currentNode2.t===2){updateGScore();return currentGScore}
+                                                                                    
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    function calculateHScore(endingNode,currentNode){
+        var rowDif = endingNode.row-currentNode.row
+        var indexDif = endingNode.index-currentNode.index
+
+        if(endingNode.row>currentNode.row){rowDif=endingNode.row-currentNode.row}else{rowDif=currentNode.row-endingNode.row}
+        if(endingNode.index>currentNode.index){indexDif=endingNode.index-currentNode.index}else{indexDif=currentNode.index-endingNode.index}
+        
+        return(rowDif+indexDif)
+    }
+    function calculateFScore(currentNode){
+        return(currentNode.g+currentNode.h)
+    }
+    function getFCost(row,index){
+        try{
+            return(discMap[row][index].f)
+        } catch(e){
+            return(99999)
+        }
+    }
+    function getNodeSpecs(row,index){
+        try{return(discMap[row][index])} catch(e){return("ERROR")}
+    }
+    function randomInt(min,max){
+        return Math.floor(Math.random() * (max-min)) + min
+    }
+    function search(){
+        var lowest = 99999;
+        var nodeArr = [];
+        if(pathCompleted===true){return}
+        else{moves+=1;}
+        for(var i=0;i<discMap.length;i++){
+            var mapRow = discMap[i];
+            for(var o=0;o<mapRow.length;o++){
+                var mapItem = mapRow[o];
+                if(mapItem.f<lowest&&mapItem.t===1){
+                    nodeArr = []
+                    lowest = mapItem.f
+                    nodeArr.push({obj:mapItem,row:i,index:o});
+                }
+                else if(mapItem===lowest&&mapItem.t===1){
+                    nodeArr.push({obj:mapItem,row:i,index:o});
+                }
+            }
+        }
+        if(nodeArr.length>1){
+            var nodeToChoose = nodeArr[randomInt(0,nodeArr.length-1)]
+            discover(nodeToChoose.row,nodeToChoose.index)
+        } else{
+            discover(nodeArr[0].row,nodeArr[0].index)
+        }
+    }
+    function updatePath(){
+        if(pathCompleted===true){
+            for(var i=0;i<discMap.length;i++){
+                var mapRow = discMap[i];
+                for(var o=0;o<mapRow.length;o++){
+                    var mapItem = mapRow[o];
+                    var parent = discMap[mapItem.p.row][mapItem.p.index]
+                    if(mapItem.t===6 && parent.t!==6 && parent.t!==2 && parent.t!==3){
+                        parent.t=6
+                    }
+                }
+            }
+        }
+    }
+    discover(9,9)
+    function drawMap(){
+        clearCanvas();
+        if(auto===true){
+            search();
+        }
+        updatePath();
+        for(var i=0;i<discMap.length;i++){
+            var mapRow = discMap[i];
+            for(var o=0;o<mapRow.length;o++){
+                var mapItem = discMap[i][o].t;
+                checkForEnd(i,o);
+                if(mapItem===0){
+                    drawPixel(o*pixelSize,i*pixelSize,pixelSize,pixelSize,'#ffffff');
+                }
+                if(mapItem===1){
+                    updateNodeScores(i,o);
+                    drawPixel(o*pixelSize,i*pixelSize,pixelSize,pixelSize,'#ff4444');
+                    drawText(`H:${discMap[i][o].h}`,o*pixelSize+5,i*pixelSize+15,10);  
+                    drawText(`G:${discMap[i][o].g}`,o*pixelSize+5,i*pixelSize+30,10);
+                    drawText(`F:${discMap[i][o].f}`,o*pixelSize+5,i*pixelSize+45,10);  
+                } 
+                if(mapItem===2){
+                    drawPixel(o*pixelSize,i*pixelSize,pixelSize,pixelSize,'#44ff44');
+                } 
+                if(mapItem===3){
+                    drawPixel(o*pixelSize,i*pixelSize,pixelSize,pixelSize,'#4444ff');
+                }
+                if(mapItem===4){
+                    drawPixel(o*pixelSize,i*pixelSize,pixelSize,pixelSize,'#000000');
+                }
+                if(mapItem===5){
+                    drawPixel(o*pixelSize,i*pixelSize,pixelSize,pixelSize,'#44ffff');
+                    drawText(`H:${discMap[i][o].h}`,o*pixelSize+5,i*pixelSize+15,10);  
+                    drawText(`G:${discMap[i][o].g}`,o*pixelSize+5,i*pixelSize+30,10);
+                    drawText(`F:${discMap[i][o].f}`,o*pixelSize+5,i*pixelSize+45,10);  
+                }
+                if(mapItem===6){
+                    drawPixel(o*pixelSize,i*pixelSize,pixelSize,pixelSize,'#ff44ff');
+                }
+            }
+        }
+        drawLines();
+    }
+    function checkForEnd(i,o){
+        
+        if(getNodeSpecs(i,o).t==5){
+            var currentNode = discMap[i][o]
+            if(getNodeSpecs(i,o-1).t===3){
+                // ***
+                // #O*
+                // ***
+                pathCompleted=true
+                currentNode.t=6
+            }
+            else if(getNodeSpecs(i,o+1).t===3){
+                // ***
+                // *O#
+                // ***
+                pathCompleted=true
+                currentNode.t=6
+            }
+            else if(getNodeSpecs(i-1,o).t===3){
+                // *#*
+                // *O*
+                // ***
+                pathCompleted=true
+                currentNode.t=6
+            }
+            else if(getNodeSpecs(i+1,o).t===3){
+                // ***
+                // *O*
+                // *#*
+                pathCompleted=true
+                currentNode.t=6
+            }
+            else if(getNodeSpecs(i+1,o+1).t===3){
+                // ***
+                // *O*
+                // **#
+                pathCompleted=true
+                currentNode.t=6
+            }
+            else if(getNodeSpecs(i+1,o-1).t===3){
+                // ***
+                // *O*
+                // #**
+                pathCompleted=true
+                currentNode.t=6
+            }
+            else if(getNodeSpecs(i-1,o+1).t===3){
+                // **#
+                // *O*
+                // ***
+                pathCompleted=true
+                currentNode.t=6
+            }
+            else if(getNodeSpecs(i-1,o-1).t===3){
+                // #**
+                // *O*
+                // ***
+                pathCompleted=true
+                currentNode.t=6
+            }
+            if(pathCompleted===true){
+                // Path Complete
+            }
+        }
+    }
+    function discover(row,index){
+        try{
+            if(discMap[row-1][index].t===0){
+                discMap[row-1][index].t=1
+                discMap[row-1][index].p = {row:row,index:index,type:"blocked"}
+                prevSearches[0] = {row:row-1,index:index}
+            }
+        } catch(e){}
+        try{
+            if(discMap[row+1][index].t===0){
+                discMap[row+1][index].t=1
+                discMap[row+1][index].p = {row:row,index:index,type:"blocked"}
+                prevSearches[1] = {row:row+1,index:index}
+            }
+        } catch(e){}
+        try{ 
+            if(discMap[row][index+1].t===0){
+                discMap[row][index+1].t=1
+                discMap[row][index+1].p = {row:row,index:index,type:"blocked"}
+                prevSearches[2] = {row:row,index:index+1}
+            }
+        } catch(e){}
+        try{
+            if(discMap[row][index-1].t===0){
+                discMap[row][index-1].t=1
+                discMap[row][index-1].p = {row:row,index:index,type:"blocked"}
+                prevSearches[3] = {row:row,index:index-1}
+            }
+        } catch(e){}
+
+
+
+        try{
+            if(discMap[row-1][index-1].t===0){
+                discMap[row-1][index-1].t=1
+                discMap[row-1][index-1].p = {row:row,index:index,type:"diag"}
+                prevSearches[3] = {row:row-1,index:index-1}
+            }
+        } catch(e){}
+        try{
+            if(discMap[row+1][index-1].t===0){
+                discMap[row+1][index-1].t=1
+                discMap[row+1][index-1].p = {row:row,index:index,type:"diag"}
+                prevSearches[3] = {row:row+1,index:index-1}
+            }
+        } catch(e){}
+        try{
+            if(discMap[row-1][index+1].t===0){
+                discMap[row-1][index+1].t=1
+                discMap[row-1][index+1].p = {row:row,index:index,type:"diag"}
+                prevSearches[3] = {row:row-1,index:index+1}
+            }
+        } catch(e){}
+        try{
+            if(discMap[row+1][index+1].t===0){
+                discMap[row+1][index+1].t=1
+                discMap[row+1][index+1].p = {row:row,index:index,type:"diag"}
+                prevSearches[3] = {row:row+1,index:index+1}
+            }
+        } catch(e){}
+
+        if(discMap[row][index].t!==2 && discMap[row][index]!==3){
+            discMap[row][index].t = 5
+        }
+    }
+    function updateNodeScores(row,index){
+        var startingNode = {};
+        var endingNode = {};
+
+        for(var i=0;i<discMap.length;i++){
+            for(var o=0;o<discMap[i].length;o++){
+                if(discMap[i][o].t===2){
+                    startingNode = {row:i,index:o}
+                }
+                if(discMap[i][o].t===3){
+                    endingNode = {row:i,index:o}
+                }
+            }
+        }
+        discMap[row][index].h = calculateHScore(endingNode,{row:row,index:index})
+        discMap[row][index].g = calculateGScore(getNodeSpecs(row,index))
+        discMap[row][index].f = calculateFScore(discMap[row][index])
+    }
+    setInterval(drawMap,1)
+</script>
