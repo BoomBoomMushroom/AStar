@@ -93,123 +93,19 @@
 
         if(currentNode.t===2){updateGScore();return currentGScore}
         else{
-            if(currentNode2.p.type==="blocked"){currentGScore+=1}
-            if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-            currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-            if(currentNode2.t===2){updateGScore();return currentGScore}
-            if(currentNode.t===2){updateGScore();return currentGScore}
-            else{
-                if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                if(currentNode2.t===2){updateGScore();return currentGScore}
-                if(currentNode.t===2){updateGScore();return currentGScore}
+            while(true){
+                if(currentNode2.p.type==="blocked"){currentGScore += 1}
+                if(currentNode2.p.type==="diag"){ currentGScore += 1.4 }
+                currentNode2 = getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
+                if(currentNode2.t===2){
+                    updateGScore();
+                    return currentGScore
+                }
+                if(currentNode.t===2){
+                    updateGScore();
+                    return currentGScore}
                 else{
-                    if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                    if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                    currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                    if(currentNode2.t===2){updateGScore();return currentGScore}
-                    if(currentNode.t===2){updateGScore();return currentGScore}
-                    else{
-                        if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                        if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                        currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                        if(currentNode2.t===2){updateGScore();return currentGScore}
-                        if(currentNode.t===2){updateGScore();return currentGScore}
-                        else{
-                            if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                            if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                            currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                            if(currentNode2.t===2){updateGScore();return currentGScore}
-                            if(currentNode.t===2){updateGScore();return currentGScore}
-                            else{
-                                if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                                if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                                currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                                if(currentNode2.t===2){updateGScore();return currentGScore}
-                                if(currentNode.t===2){updateGScore();return currentGScore}
-                                else{
-                                    if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                                    if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                                    currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                                    if(currentNode2.t===2){updateGScore();return currentGScore}
-                                    else{
-                                        if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                                        if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                                        currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                                        if(currentNode2.t===2){updateGScore();return currentGScore}
-                                        else{
-                                            if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                                            if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                                            currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                                            if(currentNode2.t===2){updateGScore();return currentGScore}
-                                            else{
-                                                if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                                                if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                                                currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                                                if(currentNode2.t===2){updateGScore();return currentGScore}
-                                                else{
-                                                    if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                                                    if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                                                    currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                                                    if(currentNode2.t===2){updateGScore();return currentGScore}
-                                                    else{
-                                                        if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                                                        if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                                                        currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                                                        if(currentNode2.t===2){updateGScore();return currentGScore}
-                                                        else{
-                                                            if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                                                            if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                                                            currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                                                            if(currentNode2.t===2){updateGScore();return currentGScore}
-                                                            else{
-                                                                if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                                                                if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                                                                currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                                                                if(currentNode2.t===2){updateGScore();return currentGScore}
-                                                                else{
-                                                                    if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                                                                    if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                                                                    currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                                                                    if(currentNode2.t===2){updateGScore();return currentGScore}
-                                                                    else{
-                                                                        if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                                                                        if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                                                                        currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                                                                        if(currentNode2.t===2){updateGScore();return currentGScore}
-                                                                        else{
-                                                                            if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                                                                            if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                                                                            currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                                                                            if(currentNode2.t===2){updateGScore();return currentGScore}
-                                                                            else{
-                                                                                if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                                                                                if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                                                                                currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                                                                                if(currentNode2.t===2){updateGScore();return currentGScore}
-                                                                                else{
-                                                                                    if(currentNode2.p.type==="blocked"){currentGScore+=1}
-                                                                                    if(currentNode2.p.type==="diag"){currentGScore+=1.4}
-                                                                                    currentNode2=getNodeSpecs(currentNode2.p.row,currentNode2.p.index)
-                                                                                    if(currentNode2.t===2){updateGScore();return currentGScore}
-                                                                                    
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    continue
                 }
             }
         }
